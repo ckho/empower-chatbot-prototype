@@ -52,9 +52,8 @@ router.get('/api/webhook', async (ctx, next) => {
 });
 router.post('/api/webhook', async (ctx, next) => {
   try {
-    console.log(ctx.request);
-    console.log(ctx.request.body);
-    const incomingMessages = messageParser.parsePayload(ctx.request.body);  
+    const incomingMessages = messageParser.parsePayload(ctx.request.body);
+    console.log(incomingMessages);
     await messagingClient.markSeen(senderId);
     await messagingClient.toggleTyping(senderId,true);
     //promise based reaction on message send confirmation

@@ -6,6 +6,8 @@ import bodyParser from 'koa-body-parser';
 let app = new Koa();
 let router = new Router();
 
+var port = process.env.PORT || 3000;
+
 const messageClient = new FacebookMessagingAPIClient(process.env.PAGE_ACCESS_TOKEN);
 
 const profileClient = new FacebookProfileAPIClient(process.env.PAGE_ACCESS_TOKEN);
@@ -76,4 +78,4 @@ app
   .use(router.routes())
   .use(router.allowedMethods());
 
-app.listen(3000);
+app.listen(port);

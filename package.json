@@ -1,0 +1,30 @@
+{
+  "name": "empower-chatbot-prototype",
+  "version": "1.0.0",
+  "author": {
+    "name": "Dicky Ho",
+    "email": "me@ckho.info",
+    "url": "https://www.ckho.info/"
+  },
+  "private": true,
+  "scripts": {
+    "prestart": "npm run build",
+    "start": "node dist/app.js",
+    "dev": "nodemon src/app.js --exec \"node -r dotenv/config -r babel-register\"",
+    "clean": "rimraf dist",
+    "build": "npm run clean && mkdir -p dist && babel src -s -D -d dist"
+  },
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "dotenv": "^7.0.0",
+    "fb-messenger-bot-api": "^4.3.1",
+    "koa": "^2.7.0",
+    "koa-body-parser": "^1.1.2",
+    "koa-compose": "^3.2.1",
+    "koa-router": "^7.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.11"
+  }
+}

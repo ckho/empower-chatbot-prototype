@@ -3,6 +3,8 @@ const BootBot = require('bootbot');
 const echoModule = require('./modules/echo');
 const helpModule = require('./modules/echo');
 
+var port = process.env.PORT || 3000;
+
 const bot = new BootBot({
   accessToken: process.env.access_token,
   verifyToken: process.env.verify_token,
@@ -142,4 +144,4 @@ bot.hear('convo', (payload, chat) => {
   });
 });
 
-bot.start();
+bot.start(port);

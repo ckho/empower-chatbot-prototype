@@ -1,0 +1,87 @@
+import {FacebookMessagingAPIClient, FacebookProfileAPIClient, ValidateWebhook, FacebookMessageParser} from 'fb-messenger-bot-api';
+import Koa from 'koa';
+import Router from 'koa-router';
+import bodyParser from 'koa-body-parser';
+
+let app = new Koa();
+let router = new Router();
+
+var port = process.env.PORT || 3000;
+
+const messagingClient = new FacebookMessagingAPIClient(process.env.PAGE_ACCESS_TOKEN);
+
+const profileClient = new FacebookProfileAPIClient(process.env.PAGE_ACCESS_TOKEN);
+
+// const result = await profileClient.setGreetingMessage('Hello World! Welcome to EMpower.');
+
+router.get('/', (ctx, next) => {
+  // ctx.router available
+});
+
+console.log(process.env);
+
+router.get('/api/webhook', async (ctx, next) => {
+  try {
+    console.log(ctx.request);
+    const fbToken = process.env.FB_VERIFICATION_TOKEN;
+    const request = {
+      query: {
+        'hub.verify_token': ctx.request.query['hub.verify_token'],
+        'hub.challenge': ctx.request.query['hub.challenge'],
+      },
+    };
+    const tokenPresent = fbToken != null;
+    const remoteTokenPresent = request != null && typeof request.query !== 'undefined' && typeof request.query['hub.verify_token'] !== 'undefined';
+    
+    if (tokenPresent && remoteTokenPresent) {
+      if (request.query['hub.verify_token'] === fbToken) {
+        ctx.body = ctx.request.query['hub.challenge'];
+        ctx.status = 200;
+      } else {
+        ctx.throw(403, 'Forbidden');
+      }
+    } else {
+      ctx.throw(403, 'Forbidden');
+    }
+    await next();
+  } catch (err) {
+    ctx.body = { message: err.message }
+    ctx.status = err.status || 500
+  }
+
+});
+router.post('/api/webhook', async (ctx, next) => {
+  console.log(ctx);
+  try {
+    const incomingMessages = FacebookMessageParser.parsePayload(ctx.request.body);
+    console.log(incomingMessages);
+    incomingMessages.forEach(async incomingMessage => {
+      var senderId = incomingMessage.sender.id;
+      var text = incomingMessage.message.text;
+      await messagingClient.markSeen(senderId);
+      await messagingClient.toggleTyping(senderId,true);
+
+      //promise based reaction on message send confirmation
+      const result = await messagingClient.sendTextMessage(senderId, 'Hello ' + text);
+      console.log('Result sent with: ${result}');
+      messagingClient.sendTextMessage(senderId, 'Hello',(result) => console.log('Result sent with: ${result}'));
+    })
+    await next();
+  } catch (err){
+    console.log(err);
+    ctx.body = { message: err.message }
+    ctx.status = err.status || 500
+  };
+  //callback based reaction on message confirmation
+  
+  // //silent message sending
+  // messagingClient.sendTextMessage(senderId,'Hello');
+  
+});
+
+app
+  .use(bodyParser())
+  .use(router.routes())
+  .use(router.allowedMethods());
+
+app.listen(port);
